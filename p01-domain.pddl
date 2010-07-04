@@ -72,9 +72,20 @@
 
 )
 
-(:constraints
+; hola2
+(:constraints ;no
     (always (not (is-moving ?a)))
-
+    (at end (is-pushing ?l)) 
+    (always (airborne ?l)) ; si ;;;;
+    (sometime (not (not_occupied ?x)) ; si ;;;;
+    (at-most-once (is-parked ?x ?y)) ; si ;;;;
+    (sometimes-after (is-parked ?t ?l) (is-parked ?x ?l)) ; si ;;;;
+    (sometimes-after (not (occupied ?e)) (occupied ?z)) ; si ;;;;
+    (sometimes-before (occupied ?l) (occupied ?l)) ; si ;;;;
+    (sometimes-before (not (occupied ?l)) (not (occupied ?x))) ; si ;;;;
+    (sometimes-before (not_blocked ?l) (not (is-pushing ?s))) ; si ;;;;
+    (sometime (not (at-segment ?l ?x))) ; si ;;;;
+    ; hola
 )
 
 (:action move_seg_pp_0_60_seg_ppdoor_0_40_north_north_medium

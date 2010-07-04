@@ -19,8 +19,12 @@ Cada linea:
 [<numero de fact> (negativo si es not)]{1,2}
 """
 
+constraint_type = {"at end" : 0, "always" : 1, "sometime" : 2, 
+        "at-most-once" : 3, "sometimes-after" : 4, "sometimes-before" : 5}
+
 class Constraint:
     def __init__(self, name, gd):
+        self.number = len(gd.arguments) + 2
         self.name = name
         self.gd = gd
 
@@ -29,7 +33,8 @@ class Constraint:
                 " " + str(self.gd)
 
     def instanciate(self):
-        pass
+        print self.number, constraint_type[self.name], \
+                names_predicates[self.gd.predicate]
 
 class BinaryConstraint(Constraint):
     def __init__(self, name, gd, gd2):
@@ -49,12 +54,10 @@ class AtomicFormula:
         return color_green + str(self.predicate) + color_normal + " " +\
                 str(self.arguments)
 
-class Not:
-    def __init__(self, gd):
-        self.gd = gd
+class Not(AtomicFormula):
 
     def __str__(self):
-        return "Not " + str(self.gd)
+        return "Not " + AtomicFormula.__str__(self)
 
 def get_maps():
     # se crean las asociaciones de constantes, tipos, predicados y hechos
@@ -125,7 +128,7 @@ def get_constraints(constraints_string):
             atom = c[1].replace('(',' ').replace(')',' ').split()
             if atom[0] == "not":
                 constraints_list.append(Constraint(constraint_name, \
-                        Not(AtomicFormula(atom[1].upper(), atom[2:]))))
+                        Not(atom[1].upper(), atom[2:])))
             else:
                 constraints_list.append(Constraint(constraint_name, \
                         AtomicFormula(atom[0].upper(), atom[1:])))
@@ -135,20 +138,20 @@ def get_constraints(constraints_string):
             atom2 = c[2].replace('(',' ').replace(')',' ').split()
             if atom[0] == "not" and atom2[0] == "not":
                 constraints_list.append(BinaryConstraint(constraint_name, \
-                        Not(AtomicFormula(atom[1], atom[2:]),\
-                        Not(AtomicFormula(atom2[1], atom2[2:])))))
+                        Not(atom[1].upper(), atom[2:])),\
+                        Not(atom2[1].upper(), atom2[2:]))
             elif atom[0] != "not" and atom2[0] == "not":
                 constraints_list.append(BinaryConstraint(constraint_name, \
-                        AtomicFormula(atom[0], atom[1:]),\
-                        Not(AtomicFormula(atom2[1], atom2[2:]))))
+                        AtomicFormula(atom[0].upper(), atom[1:]),\
+                        Not(atom2[1].upper(), atom2[2:])))
             elif atom[0] == "not" and atom2[0] != "not":
                 constraints_list.append(BinaryConstraint(constraint_name, \
-                        Not(AtomicFormula(atom[1], atom[2:]),\
-                        AtomicFormula(atom2[0], atom2[1:]))))
+                        Not(atom[1].upper(), atom[2:])),\
+                        AtomicFormula(atom2[0].upper(), atom2[1:]))
             else:
                 constraints_list.append(BinaryConstraint(constraint_name, \
-                        Not(AtomicFormula(atom[0], atom[1:])),\
-                    Not(AtomicFormula(atom2[0], atom2[1:]))))
+                        Not(atom[0].upper(), atom[1:]),\
+                    Not(atom2[0].upper(), atom2[1:])))
     except KeyError, e:
         raise SystemExit("ERROR: no se pudo encontrar el predicado %s" %(str(e)))
 
@@ -222,4 +225,5 @@ constraints_list = get_constraints(constraints_string)
 print "\nCONSTRAINTS:"
 for c in constraints_list:
     print c
+    print "\nnum_elementos, tipo, predicado, variables" 
     instancias = c.instanciate()
