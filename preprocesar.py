@@ -52,7 +52,7 @@ class Constraint:
             if not variable_types.has_key(arg):
                 variable_types[arg] = predicate_arg_types[index]
             else:
-                if predicate_arg_types != variable_types[arg]:
+                if predicate_arg_types[index] != variable_types[arg]:
                     # error de tipo
                     raise SystemExit("ERROR: no coincide el tipo de los argumentos " \
                             + "en el predicado '%s', en el argumento numero %s" \
@@ -63,25 +63,32 @@ class Constraint:
         self.instantiate(0, len(predicate_arg_list), [])
 
     def instantiate(self, argument_index, max_level, instantiated_vars):
-        pass
-#        atom = self.gd
-#        predicate_number = names_predicates[atom.predicate]
-#        predicate_arg_types = predicates_names[predicate_number][1]        
-#        predicate_arg_list = atom.arguments
-#        # predicate_arg_types contiene los enteros correspondientes
-#        # a los tipos del predicado que se esta analizando
-#        if argument_index == max_level:
-#            instantiated_constraints.append((self.name, predicate_number, instantiated_vars)) 
-#        else:
-#            if is_instantiated(predicate_arg_list[argument_index]):
-#                self.instantiate(argument_index + 1, max_level, instantiated_vars)
-#            else:
-#                for constant in types_names[predicate_arg_types[argument_index]][1]:
-#                    for j in range(argument_index, max_level):
-#                        # chequear argumentos repetidos
-#                        if predicate_arg_list[j] == predicate_arg_list[argument_index]:
-#                            predicate_arg_list[j] = constant
-#                    self.instantiate(argument_index + 1, max_level, instantiated_vars)
+        atom = self.gd
+        predicate_number = names_predicates[atom.predicate]
+        predicate_arg_types = predicates_names[predicate_number][1]        
+        predicate_arg_list = atom.arguments
+        # predicate_arg_types contiene los enteros correspondientes
+        # a los tipos del predicado que se esta analizando
+        if argument_index == max_level:
+            instantiated_constraints.append((self.name, [atom.predicate] + predicate_arg_list[:])) 
+        else:
+            # if there's a constant already, continue to the next arg
+            if is_instantiated(predicate_arg_list[argument_index]):
+                self.instantiate(argument_index + 1, max_level, instantiated_vars)
+            else:
+                constants_of_this_type = types_names[predicate_arg_types[argument_index]][1]
+                for constant in constants_of_this_type:
+                    variables_instantiated = [(argument_index, predicate_arg_list[argument_index])]
+                    for j in range(argument_index + 1, max_level):
+                        # chequear argumentos repetidos
+                        if predicate_arg_list[j] == predicate_arg_list[argument_index]:
+                            variables_instantiated.append((j, predicate_arg_list[j]))
+                            predicate_arg_list[j] = constant
+                    predicate_arg_list[argument_index] = constant # instantiate
+                    print predicate_arg_list
+                    self.instantiate(argument_index + 1, max_level, instantiated_vars)
+                    for index, var in variables_instantiated:
+                        predicate_arg_list[index] = var # set the variables back
 
 class BinaryConstraint(Constraint):
     def __init__(self, name, gd, gd2):
@@ -107,7 +114,7 @@ class Not(AtomicFormula):
         return "Not " + AtomicFormula.__str__(self)
 
 def is_instantiated(variable):
-    return variable[0] != "?"
+    return not isinstance(variable, str) or variable[0] != "?"
 
 def get_maps():
     # se crean las asociaciones de constantes, tipos, predicados y hechos
@@ -169,7 +176,6 @@ def get_constraints(constraints_string):
     unary_list = unary_constraints.findall(constraints_string)
     binary_list = binary_constraints.findall(constraints_string)
 
-    print binary_list
     # se verifica que si existen constantes en las listas
     # de constraints, estas se correspondan a alguna
     # constante del problema o dominio

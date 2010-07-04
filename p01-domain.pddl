@@ -74,19 +74,19 @@
 
 ; hola2
 (:constraints ;no
-   ; (always (not (is-moving ?a)))
-   ; (at end (is-pushing ?l)) 
-   ; (always (airborne ?l ?s)) ; si ;;;;
-   ; (sometime (not (not_occupied ?x)) ; si ;;;;
-   ; (at-most-once (is-parked airplane_CFBEG ?x)) ; si ;;;;
-    (sometimes-after (not (occupied ?e)) (occupied ?z)) ; si ;;;;
-    (sometimes-before (not (occupied ?l)) (not (occupied ?x))) ; si ;;;;
-    (sometimes-before (occupied ?l) (occupied ?l)) ; si ;;;;
-    (always (ternary (?x ?y ?z)))
-    (sometimes-before (not_blocked ?l ?t) (not (is-pushing ?s))) ; si ;;;;
-    (sometimes-after (is-parked ?t ?l) (is-parked ?x ?l)) ; si ;;;;
-    (sometime (not (at-segment ?l ?x))) ; si ;;;;
-    ; hola
+;    (always (not (is-moving ?a)))
+;    (at end (is-pushing ?l)) 
+;    (always (airborne ?l ?s)) ; si ;;;;
+;    (sometime (not (not_occupied ?x)) ; si ;;;;
+;    (at-most-once (is-parked airplane_CFBEG ?x)) ; si ;;;;
+;    (sometimes-after (not (occupied ?e)) (occupied ?z)) ; si ;;;;
+;    (sometimes-before (not (occupied ?l)) (not (occupied ?x))) ; si ;;;;
+;    (sometimes-before (occupied ?l) (occupied ?l)) ; si ;;;;
+    (always (ternary (?x ?y ?x)))
+;    (sometimes-before (not_blocked ?l airplane_CFBEG) (not (is-pushing ?s))) ; si ;;;;
+;    (sometimes-after (is-parked ?t ?l) (is-parked ?x ?l)) ; si ;;;;
+;    (sometime (not (at-segment ?l ?x))) ; si ;;;;
+;    ; hola
 )
 
 (:action move_seg_pp_0_60_seg_ppdoor_0_40_north_north_medium
