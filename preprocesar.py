@@ -182,11 +182,11 @@ def get_constraints(constraints_string):
             atom = c[1].replace('(',' ').replace(')',' ').split()
 
             if atom[0] == "not":
-                check_constants(atom[2:])
+                check_constants(atom[1:])
                 constraints_list.append(Constraint(constraint_name, \
                         Not(atom[1].upper(), atom[2:])))
             else:
-                check_constants(atom[1:])
+                check_constants(atom)
                 constraints_list.append(Constraint(constraint_name, \
                         AtomicFormula(atom[0].upper(), atom[1:])))
         for c in binary_list:
@@ -195,26 +195,26 @@ def get_constraints(constraints_string):
             atom2 = c[2].replace('(',' ').replace(')',' ').split()
 
             if atom[0] == "not" and atom2[0] == "not":
-                check_constants(atom[2:])
-                check_constants(atom2[2:])
+                check_constants(atom[1:])
+                check_constants(atom2[1:])
                 constraints_list.append(BinaryConstraint(constraint_name, \
                         Not(atom[1].upper(), atom[2:])),\
                         Not(atom2[1].upper(), atom2[2:]))
             elif atom[0] != "not" and atom2[0] == "not":
-                check_constants(atom[1:])
-                check_constants(atom2[2:])
+                check_constants(atom)
+                check_constants(atom2[1:])
                 constraints_list.append(BinaryConstraint(constraint_name, \
                         AtomicFormula(atom[0].upper(), atom[1:]),\
                         Not(atom2[1].upper(), atom2[2:])))
             elif atom[0] == "not" and atom2[0] != "not":
                 check_constants(atom[2:])
-                check_constants(atom2[1:])
+                check_constants(atom2)
                 constraints_list.append(BinaryConstraint(constraint_name, \
                         Not(atom[1].upper(), atom[2:])),\
                         AtomicFormula(atom2[0].upper(), atom2[1:]))
             else:
-                check_constants(atom[1:])
-                check_constants(atom2[1:])
+                check_constants(atom)
+                check_constants(atom2)
                 constraints_list.append(BinaryConstraint(constraint_name, \
                         Not(atom[0].upper(), atom[1:]),\
                     Not(atom2[0].upper(), atom2[1:])))
@@ -224,9 +224,22 @@ def get_constraints(constraints_string):
     return constraints_list    
 
 def check_constants(variable_list):
-    for variable in variable_list:
-        if is_instantiated(variable) and not names_constants.has_key(variable.upper()):
-            raise SystemExit("ERROR: no se pudo encontrar la constante %s" %(variable))
+    # en variable_list[0] esta el nombre del predicado
+    # en el resto de la lista estan las variables
+    for index, variable in enumerate(variable_list[1:]):
+        if is_instantiated(variable):
+            constant = variable.upper()
+            try:
+                constant_number = names_constants[constant]
+            except KeyError:
+                raise SystemExit("ERROR: no se pudo encontrar la constante '%s'" %(variable))
+            # obtener el tipo esperado por el predicado
+            predicate_number = names_predicates[variable_list[0].upper()]
+            expected_type = predicates_names[predicate_number][1][index]
+
+            if constant_number not in types_names[expected_type][1]:
+                raise SystemExit("ERROR: la constante '%s' deberia ser de tipo '%s'"\
+                        % (constant, types_names[expected_type][0]))
 
 # main
 # se lee el dominio
