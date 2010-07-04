@@ -32,9 +32,32 @@ class Constraint:
         return "Constraint " + color_red + str(self.name) + color_normal +\
                 " " + str(self.gd)
 
-    def instanciate(self):
-        print self.number, constraint_type[self.name], \
-                names_predicates[self.gd.predicate]
+    def instantiate(self):
+        atom = self.gd
+        predicate_number = names_predicates[atom.predicate]
+        predicate_arg_types = predicates_names[predicate_number][1]        
+        predicate_arg_list = atom.arguments
+
+        # predicate_arg_types contiene los enteros correspondientes
+        # a los tipos del predicado que se esta analizando
+
+        if len(predicate_arg_list) != len(predicate_arg_types):
+            raise SystemExit("ERROR: no coincide el numero de argumentos " \
+                    + "en el predicado '%s'" %(str(atom)))
+        instantiated_constraints = instantiate_predicate(predicate_number, \
+                predicate_arg_list, predicate_arg_types)
+        print instantiated_constraints
+        
+        #for argument_number, type in enumerate(predicate_arg_types):
+        #    se instancia en todas las constantes de este tipo
+        #    print types_names[type][1]
+            #for tuple in combination(types_names[type][1], :
+            #    instantiated_atoms.append([self.number, \
+            #            predicate_number, tuple])
+
+        #print instantiated_atoms
+        #for argument_number, variable in enumerate(atom.arguments):
+        #    for constant in t
 
 class BinaryConstraint(Constraint):
     def __init__(self, name, gd, gd2):
@@ -157,6 +180,12 @@ def get_constraints(constraints_string):
 
     return constraints_list    
 
+def instantiate_predicate(predicate_number, predicate_arg_list,\
+        predicate_arg_types):
+    print predicate_number, predicate_arg_list, predicate_arg_types
+    return []
+
+
 # main
 try:
     f = open(argv[1], 'r')
@@ -226,4 +255,4 @@ print "\nCONSTRAINTS:"
 for c in constraints_list:
     print c
     print "\nnum_elementos, tipo, predicado, variables" 
-    instancias = c.instanciate()
+    instancias = c.instantiate()

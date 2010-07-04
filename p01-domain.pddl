@@ -76,15 +76,16 @@
 (:constraints ;no
     (always (not (is-moving ?a)))
     (at end (is-pushing ?l)) 
-    (always (airborne ?l)) ; si ;;;;
+    (always (airborne ?l ?s)) ; si ;;;;
     (sometime (not (not_occupied ?x)) ; si ;;;;
     (at-most-once (is-parked ?x ?y)) ; si ;;;;
     (sometimes-after (is-parked ?t ?l) (is-parked ?x ?l)) ; si ;;;;
     (sometimes-after (not (occupied ?e)) (occupied ?z)) ; si ;;;;
     (sometimes-before (occupied ?l) (occupied ?l)) ; si ;;;;
     (sometimes-before (not (occupied ?l)) (not (occupied ?x))) ; si ;;;;
-    (sometimes-before (not_blocked ?l) (not (is-pushing ?s))) ; si ;;;;
+    (sometimes-before (not_blocked ?l ?t) (not (is-pushing ?s))) ; si ;;;;
     (sometime (not (at-segment ?l ?x))) ; si ;;;;
+    (always (ternary (?x ?y ?z)))
     ; hola
 )
 
