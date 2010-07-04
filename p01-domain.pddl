@@ -85,7 +85,7 @@
     (sometimes-before (not (occupied ?l)) (not (occupied ?x))) ; si ;;;;
     (sometimes-before (not_blocked ?l ?t) (not (is-pushing ?s))) ; si ;;;;
     (sometime (not (at-segment ?l ?x))) ; si ;;;;
-    (always (ternary (?x ?x ?z)))
+    (always (ternary (?x ?y ?z)))
     ; hola
 )
 

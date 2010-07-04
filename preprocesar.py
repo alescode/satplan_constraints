@@ -57,21 +57,32 @@ class Constraint:
                     raise SystemExit("ERROR: no coincide el tipo de los argumentos " \
                             + "en el predicado '%s', en el argumento numero %s" \
                             %(str(atom), index+1))
-        print variable_types
 
     def add_constraint(self):
-        atom = self.gd
-        predicate_number = names_predicates[atom.predicate]
-        predicate_arg_types = predicates_names[predicate_number][1]        
-        predicate_arg_list = atom.arguments
+        predicate_arg_list = self.gd.arguments
+        self.instantiate(0, len(predicate_arg_list), [])
 
-        # predicate_arg_types contiene los enteros correspondientes
-        # a los tipos del predicado que se esta analizando
+    def instantiate(self, argument_index, max_level, instantiated_vars):
+        pass
+#        atom = self.gd
+#        predicate_number = names_predicates[atom.predicate]
+#        predicate_arg_types = predicates_names[predicate_number][1]        
+#        predicate_arg_list = atom.arguments
+#        # predicate_arg_types contiene los enteros correspondientes
+#        # a los tipos del predicado que se esta analizando
+#        if argument_index == max_level:
+#            instantiated_constraints.append((self.name, predicate_number, instantiated_vars)) 
+#        else:
+#            if is_instantiated(predicate_arg_list[argument_index]):
+#                self.instantiate(argument_index + 1, max_level, instantiated_vars)
+#            else:
+#                for constant in types_names[predicate_arg_types[argument_index]][1]:
+#                    for j in range(argument_index, max_level):
+#                        # chequear argumentos repetidos
+#                        if predicate_arg_list[j] == predicate_arg_list[argument_index]:
+#                            predicate_arg_list[j] = constant
+#                    self.instantiate(argument_index + 1, max_level, instantiated_vars)
 
-        instantiated_constraints = instantiate_predicate(predicate_number, \
-                predicate_arg_list, predicate_arg_types)
-        print instantiated_constraints
-        
 class BinaryConstraint(Constraint):
     def __init__(self, name, gd, gd2):
         Constraint.__init__(self, name, gd)
@@ -94,6 +105,9 @@ class Not(AtomicFormula):
 
     def __str__(self):
         return "Not " + AtomicFormula.__str__(self)
+
+def is_instantiated(variable):
+    return variable[0] != "?"
 
 def get_maps():
     # se crean las asociaciones de constantes, tipos, predicados y hechos
@@ -194,11 +208,6 @@ def get_constraints(constraints_string):
     return constraints_list    
 
 
-def instantiate_predicate(predicate_number, predicate_arg_list,\
-        predicate_arg_types):
-    print predicate_number, predicate_arg_list, predicate_arg_types
-    return []
-
 # main
 try:
     f = open(argv[1], 'r')
@@ -256,6 +265,9 @@ names_constants , names_types , names_predicates , names_facts = {}, {}, {}, {}
 # map que asocia a cada constante su tipo
 type_of_constant = {}
 
+# constraints instanciados, lista global
+instantiated_constraints = []
+
 get_maps()
 
 if DEBUG:
@@ -272,3 +284,5 @@ for c in constraints_list:
     print "\nnum_elementos, tipo, predicado, variables" 
     print c
     instancias = c.add_constraint()
+
+print instantiated_constraints
