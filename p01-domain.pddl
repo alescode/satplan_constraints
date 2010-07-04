@@ -78,7 +78,7 @@
     (at end (is-pushing ?l)) 
     (always (airborne ?l ?s)) ; si ;;;;
     (sometime (not (not_occupied ?x)) ; si ;;;;
-    (at-most-once (is-parked ?x ?y)) ; si ;;;;
+    (at-most-once (is-parked ?x airplane_CFBEG)) ; si ;;;;
     (sometimes-after (is-parked ?t ?l) (is-parked ?x ?l)) ; si ;;;;
     (sometimes-after (not (occupied ?e)) (occupied ?z)) ; si ;;;;
     (sometimes-before (occupied ?l) (occupied ?l)) ; si ;;;;

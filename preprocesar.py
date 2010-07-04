@@ -168,6 +168,10 @@ def get_constraints(constraints_string):
     unary_list = unary_constraints.findall(constraints_string)
     binary_list = binary_constraints.findall(constraints_string)
 
+    # se verifica que si existen constantes en las listas
+    # de constraints, estas se correspondan a alguna
+    # constante del problema o dominio
+
     # esta agregacion de constraints sirve solo para casos sencillos
     # (not y formulas atomicas), este manejo se hace para
     # evitar analizar la gramatica
@@ -176,29 +180,41 @@ def get_constraints(constraints_string):
         for c in unary_list:
             constraint_name = c[0]
             atom = c[1].replace('(',' ').replace(')',' ').split()
+
             if atom[0] == "not":
+                check_constants(atom[2:])
                 constraints_list.append(Constraint(constraint_name, \
                         Not(atom[1].upper(), atom[2:])))
             else:
+                check_constants(atom[1:])
                 constraints_list.append(Constraint(constraint_name, \
                         AtomicFormula(atom[0].upper(), atom[1:])))
         for c in binary_list:
             constraint_name = c[0]
             atom = c[1].replace('(',' ').replace(')',' ').split()
             atom2 = c[2].replace('(',' ').replace(')',' ').split()
+
             if atom[0] == "not" and atom2[0] == "not":
+                check_constants(atom[2:])
+                check_constants(atom2[2:])
                 constraints_list.append(BinaryConstraint(constraint_name, \
                         Not(atom[1].upper(), atom[2:])),\
                         Not(atom2[1].upper(), atom2[2:]))
             elif atom[0] != "not" and atom2[0] == "not":
+                check_constants(atom[1:])
+                check_constants(atom2[2:])
                 constraints_list.append(BinaryConstraint(constraint_name, \
                         AtomicFormula(atom[0].upper(), atom[1:]),\
                         Not(atom2[1].upper(), atom2[2:])))
             elif atom[0] == "not" and atom2[0] != "not":
+                check_constants(atom[2:])
+                check_constants(atom2[1:])
                 constraints_list.append(BinaryConstraint(constraint_name, \
                         Not(atom[1].upper(), atom[2:])),\
                         AtomicFormula(atom2[0].upper(), atom2[1:]))
             else:
+                check_constants(atom[1:])
+                check_constants(atom2[1:])
                 constraints_list.append(BinaryConstraint(constraint_name, \
                         Not(atom[0].upper(), atom[1:]),\
                     Not(atom2[0].upper(), atom2[1:])))
@@ -206,6 +222,11 @@ def get_constraints(constraints_string):
         raise SystemExit("ERROR: no se pudo encontrar el predicado %s" %(str(e)))
 
     return constraints_list    
+
+def check_constants(variable_list):
+    for variable in variable_list:
+        if is_instantiated(variable) and not names_constants.has_key(variable.upper()):
+            raise SystemExit("ERROR: no se pudo encontrar la constante %s" %(variable))
 
 # main
 # se lee el dominio
@@ -235,7 +256,7 @@ if not isfile(nombre_nuevo):
     archivo_nuevo = open(nombre_nuevo, 'w')
     archivo_nuevo.write(no_constraints)
     archivo_nuevo.close()
-    if DEBUG: print ">>> wrote new file " + nombre_nuevo
+    if DEBUG: print ">>> se escribio un archivo nuevo " + nombre_nuevo   
 
 # se lee el problema
 try:
@@ -263,7 +284,7 @@ if not isfile(nombre_nuevo):
     archivo_nuevo = open(nombre_nuevo, 'w')
     archivo_nuevo.write(no_constraints)
     archivo_nuevo.close()
-    if DEBUG: print ">>> wrote new file " + nombre_nuevo   
+    if DEBUG: print ">>> se escribio un archivo nuevo " + nombre_nuevo   
 
 # quitar comentarios
 lines = constraints_string.splitlines()
