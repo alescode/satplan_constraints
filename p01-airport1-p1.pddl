@@ -75,4 +75,9 @@
             (is-parked airplane_CFBEG seg_pp_0_60)
       )
 )
+
+(:constraints
+    (always (is-parked ?x ?y))
+)
+
 )

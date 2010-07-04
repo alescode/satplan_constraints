@@ -15,8 +15,8 @@ color_normal = '\033[0m'
 """
 Convenciones para pasar output a C:
 Cada linea:
-<# de elementos en el constraint> <tipo de constraint>
-[<numero de fact> (negativo si es not)]{1,2}
+<tipo de constraint>
+(+|-)[<numero de fact>]{1,2}
 """
 
 constraint_type = {"at end" : 0, "always" : 1, "sometime" : 2, 
@@ -207,19 +207,19 @@ def get_constraints(constraints_string):
 
     return constraints_list    
 
-
 # main
+# se lee el dominio
 try:
     f = open(argv[1], 'r')
-    original = f.read()
+    dominio = f.read()
     f.close()
 except IndexError:
-    raise SystemExit("No hay archivo de entrada")
+    raise SystemExit("No hay archivo de dominio de entrada")
 except IOError:
-    raise SystemExit("No se encontro el archivo")
+    raise SystemExit("No se encontro el archivo de dominio")
 
 # se separa la seccion de constraints del PDDL
-primero = original.partition("(:constraints") 
+primero = dominio.partition("(:constraints") 
 segundo = primero[2].partition("(:action") 
 
 constraints_string = segundo[0]
@@ -227,15 +227,43 @@ constraints_string = segundo[0]
 no_constraints = primero[0] + segundo[1] + segundo[2] 
 
 # se reescribe el archivo sin constraints
-archivo_original = argv[1].partition(".")
-nombre_nuevo = archivo_original[0] + "_nc" + archivo_original[1] +\
-        archivo_original[2]
+archivo_dominio = argv[1].partition(".")
+nombre_nuevo = archivo_dominio[0] + "_nc" + archivo_dominio[1] +\
+        archivo_dominio[2]
 
 if not isfile(nombre_nuevo):
     archivo_nuevo = open(nombre_nuevo, 'w')
     archivo_nuevo.write(no_constraints)
     archivo_nuevo.close()
     if DEBUG: print ">>> wrote new file " + nombre_nuevo
+
+# se lee el problema
+try:
+    f = open(argv[2], 'r')
+    problema = f.read()
+    f.close()
+except IndexError:
+    raise SystemExit("No hay archivo de problema de entrada")
+except IOError:
+    raise SystemExit("No se encontro el archivo de problema")
+
+# se separa la seccion de constraints del PDDL
+primero = problema.partition("(:constraints") 
+
+constraints_string += " " + primero[2]
+
+no_constraints = primero[0] + " " + ")\n"
+
+# se reescribe el archivo sin constraints
+archivo_problema = argv[2].partition(".")
+nombre_nuevo = archivo_problema[0] + "_nc" + archivo_problema[1] +\
+        archivo_problema[2]
+
+if not isfile(nombre_nuevo):
+    archivo_nuevo = open(nombre_nuevo, 'w')
+    archivo_nuevo.write(no_constraints)
+    archivo_nuevo.close()
+    if DEBUG: print ">>> wrote new file " + nombre_nuevo   
 
 # quitar comentarios
 lines = constraints_string.splitlines()
@@ -245,7 +273,7 @@ constraints_string = " ".join(lines)
 
 # se lee el archivo de tablas pasado por el planificador
 try:
-    f = open(argv[2], 'r')
+    f = open(argv[3], 'r')
     tablas = f.read()
     f.close()
 except IndexError:
