@@ -163,11 +163,13 @@ def get_constraints(constraints_string):
     unary_constraints = re.compile(r"\((at end|at-most-once|always|sometime)\b\s+"\
                                    + "(\([^)]+\))\)")
     binary_constraints = re.compile(r"\((sometimes-before|sometimes-after)\b\s+"\
-                                   + "(\([^)]+\))\s+(\([^)]+\))\)")
+                                   + "(\([^)]+\)|\(not\s*\([^)]+\)\s*\))\s*"
+                                   + "(\([^)]+\)|\(not\s*\([^)]+\)\s*\))\s*\)")
 
     unary_list = unary_constraints.findall(constraints_string)
     binary_list = binary_constraints.findall(constraints_string)
 
+    print binary_list
     # se verifica que si existen constantes en las listas
     # de constraints, estas se correspondan a alguna
     # constante del problema o dominio
@@ -198,8 +200,8 @@ def get_constraints(constraints_string):
                 check_constants(atom[1:])
                 check_constants(atom2[1:])
                 constraints_list.append(BinaryConstraint(constraint_name, \
-                        Not(atom[1].upper(), atom[2:])),\
-                        Not(atom2[1].upper(), atom2[2:]))
+                        Not(atom[1].upper(), atom[2:]),\
+                        Not(atom2[1].upper(), atom2[2:])))
             elif atom[0] != "not" and atom2[0] == "not":
                 check_constants(atom)
                 check_constants(atom2[1:])
@@ -210,14 +212,14 @@ def get_constraints(constraints_string):
                 check_constants(atom[2:])
                 check_constants(atom2)
                 constraints_list.append(BinaryConstraint(constraint_name, \
-                        Not(atom[1].upper(), atom[2:])),\
-                        AtomicFormula(atom2[0].upper(), atom2[1:]))
+                        Not(atom[1].upper(), atom[2:]),\
+                        AtomicFormula(atom2[0].upper(), atom2[1:])))
             else:
                 check_constants(atom)
                 check_constants(atom2)
                 constraints_list.append(BinaryConstraint(constraint_name, \
-                        Not(atom[0].upper(), atom[1:]),\
-                    Not(atom2[0].upper(), atom2[1:])))
+                        AtomicFormula(atom[0].upper(), atom[1:]),\
+                    AtomicFormula(atom2[0].upper(), atom2[1:])))
     except KeyError, e:
         raise SystemExit("ERROR: no se pudo encontrar el predicado %s" %(str(e)))
 
