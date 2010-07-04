@@ -12,6 +12,13 @@ color_green = '\033[1;32m'
 color_yellow = '\033[1;33m'
 color_normal = '\033[0m'  
 
+"""
+Convenciones para pasar output a C:
+Cada linea:
+<# de elementos en el constraint> <tipo de constraint>
+[<numero de fact> (negativo si es not)]{1,2}
+"""
+
 class Constraint:
     def __init__(self, name, gd):
         self.name = name
@@ -22,7 +29,7 @@ class Constraint:
                 " " + str(self.gd)
 
     def instanciate(self):
-        print self
+        pass
 
 class BinaryConstraint(Constraint):
     def __init__(self, name, gd, gd2):
@@ -118,10 +125,10 @@ def get_constraints(constraints_string):
             atom = c[1].replace('(',' ').replace(')',' ').split()
             if atom[0] == "not":
                 constraints_list.append(Constraint(constraint_name, \
-                        Not(AtomicFormula(names_predicates[atom[1].upper()], atom[2:]))))
+                        Not(AtomicFormula(atom[1].upper(), atom[2:]))))
             else:
                 constraints_list.append(Constraint(constraint_name, \
-                        AtomicFormula(names_predicates[atom[0].upper()], atom[1:])))
+                        AtomicFormula(atom[0].upper(), atom[1:])))
         for c in binary_list:
             constraint_name = c[0]
             atom = c[1].replace('(',' ').replace(')',' ').split()
@@ -212,5 +219,7 @@ if DEBUG:
 
 constraints_list = get_constraints(constraints_string)
 
+print "\nCONSTRAINTS:"
 for c in constraints_list:
-    c.instanciate()
+    print c
+    instancias = c.instanciate()
