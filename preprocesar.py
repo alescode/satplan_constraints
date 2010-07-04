@@ -36,8 +36,8 @@ class AtomicFormula:
         self.arguments = arguments
 
     def __str__(self):
-        return color_green + self.predicate + " " + str(self.arguments)\
-                + color_normal
+        return color_green + self.predicate + color_normal + " " +\
+                str(self.arguments)
 
 class Not:
     def __init__(self, gd):
@@ -78,6 +78,65 @@ lines = constraints.splitlines()
 for i, line in enumerate(lines):
     lines[i] = line.partition(";")[0]
 constraints = " ".join(lines)
+
+try:
+    f = open(argv[2], 'r')
+    tablas = f.read()
+    f.close()
+except IndexError:
+    try:
+        f = open("tablas", 'r')
+        tablas = f.read().split("\n\n")
+        f.close()
+    except IOError:
+        raise SystemExit("No se encontro el archivo de tablas")
+except IOError:
+    raise SystemExit("No se encontro el archivo de tablas")
+
+# maps
+constants_names = []
+names_constants = {}
+for line in tablas[0].splitlines()[1:]:
+    partition = line.split()
+    constants_names.append(partition[1])
+    names_constants[partition[1]] = int(partition[0])
+
+print constants_names, names_constants
+
+types_names = []
+names_types = {}
+for line in tablas[1].splitlines()[1:]:
+    partition = line.split(" ", 2)
+    # convert to int the list of vars of every type
+    variable_list = line.split()[2:]
+    for i, var in enumerate(variable_list):
+        variable_list[i] = int(var)
+
+    types_names.append((partition[1], variable_list))
+    names_types[partition[1]] = int(partition[0])
+
+print
+print types_names, names_types
+
+predicates_names = []
+names_predicates = {}
+for line in tablas[2].splitlines()[1:]:
+    partition = line.split()
+    predicates_names.append(partition[1])
+    names_predicates[partition[1]] = int(partition[0])
+
+print
+print predicates_names, names_predicates
+
+facts_names = []
+names_facts = {}
+for line in tablas[3].splitlines()[1:]:
+    partition = line.split(" ", 1)
+    facts_names.append(partition[1])
+    names_facts[partition[1]] = int(partition[0])
+
+print
+print facts_names, names_facts
 
 # parsear el string "constraints" en este punto
 # si se quiere agregar constraints mas elaboradas
@@ -123,6 +182,6 @@ for c in binary_list:
                 Not(AtomicFormula(atom[0], atom[1:])),\
                 Not(AtomicFormula(atom2[0], atom2[1:]))))
 
-for c in constraints_list:
-    print c
+#for c in constraints_list:
+#    print c
 
