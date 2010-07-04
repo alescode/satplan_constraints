@@ -21,6 +21,9 @@ class Constraint:
         return "Constraint " + color_red + str(self.name) + color_normal +\
                 " " + str(self.gd)
 
+    def instanciate(self):
+        print self
+
 class BinaryConstraint(Constraint):
     def __init__(self, name, gd, gd2):
         Constraint.__init__(self, name, gd)
@@ -54,7 +57,7 @@ def get_maps():
         names_constants[partition[1]] = int(partition[0])
                                                                 
     if DEBUG:
-        print color_red + "CONSTANTES " + color_normal
+        print color_red + "\nCONSTANTES " + color_normal
         print constants_names, names_constants
 
     for line in tablas[1].splitlines()[1:]:
@@ -69,16 +72,20 @@ def get_maps():
         names_types[partition[1]] = int(partition[0])
 
     if DEBUG:
-        print color_red + "TIPOS " + color_normal
+        print color_red + "\nTIPOS " + color_normal
         print types_names, names_types
 
     for line in tablas[2].splitlines()[1:]:
-        partition = line.split()
-        predicates_names.append(partition[1])
+        partition = line.split(" ", 2)
+        argument_types = line.split()[2:]
+        for i, const in enumerate(argument_types):
+            argument_types[i] = int(const)
+
+        predicates_names.append((partition[1], argument_types))
         names_predicates[partition[1]] = int(partition[0])
 
     if DEBUG:
-        print color_red + "PREDICADOS " + color_normal
+        print color_red + "\nPREDICADOS " + color_normal
         print predicates_names, names_predicates
 
     for line in tablas[3].splitlines()[1:]:
@@ -87,7 +94,7 @@ def get_maps():
         names_facts[partition[1]] = int(partition[0])
 
     if DEBUG:
-        print color_red + "HECHOS " + color_normal
+        print color_red + "\nHECHOS " + color_normal
         print facts_names, names_facts
 
 def get_constraints(constraints_string):
@@ -105,35 +112,38 @@ def get_constraints(constraints_string):
     # (not y formulas atomicas), este manejo se hace para
     # evitar analizar la gramatica
     constraints_list = []
-    for c in unary_list:
-        constraint_name = c[0]
-        atom = c[1].replace('(',' ').replace(')',' ').split()
-        if atom[0] == "not":
-            constraints_list.append(Constraint(constraint_name, \
-                    Not(AtomicFormula(names_predicates[atom[1].upper()], atom[2:]))))
-        else:
-            constraints_list.append(Constraint(constraint_name, \
-                    AtomicFormula(names_predicates[atom[0].upper()], atom[1:])))
-    for c in binary_list:
-        constraint_name = c[0]
-        atom = c[1].replace('(',' ').replace(')',' ').split()
-        atom2 = c[2].replace('(',' ').replace(')',' ').split()
-        if atom[0] == "not" and atom2[0] == "not":
-            constraints_list.append(BinaryConstraint(constraint_name, \
-                    Not(AtomicFormula(atom[1], atom[2:]),\
-                    Not(AtomicFormula(atom2[1], atom2[2:])))))
-        elif atom[0] != "not" and atom2[0] == "not":
-            constraints_list.append(BinaryConstraint(constraint_name, \
-                    AtomicFormula(atom[0], atom[1:]),\
-                    Not(AtomicFormula(atom2[1], atom2[2:]))))
-        elif atom[0] == "not" and atom2[0] != "not":
-            constraints_list.append(BinaryConstraint(constraint_name, \
-                    Not(AtomicFormula(atom[1], atom[2:]),\
-                    AtomicFormula(atom2[0], atom2[1:]))))
-        else:
-            constraints_list.append(BinaryConstraint(constraint_name, \
-                    Not(AtomicFormula(atom[0], atom[1:])),\
+    try:
+        for c in unary_list:
+            constraint_name = c[0]
+            atom = c[1].replace('(',' ').replace(')',' ').split()
+            if atom[0] == "not":
+                constraints_list.append(Constraint(constraint_name, \
+                        Not(AtomicFormula(names_predicates[atom[1].upper()], atom[2:]))))
+            else:
+                constraints_list.append(Constraint(constraint_name, \
+                        AtomicFormula(names_predicates[atom[0].upper()], atom[1:])))
+        for c in binary_list:
+            constraint_name = c[0]
+            atom = c[1].replace('(',' ').replace(')',' ').split()
+            atom2 = c[2].replace('(',' ').replace(')',' ').split()
+            if atom[0] == "not" and atom2[0] == "not":
+                constraints_list.append(BinaryConstraint(constraint_name, \
+                        Not(AtomicFormula(atom[1], atom[2:]),\
+                        Not(AtomicFormula(atom2[1], atom2[2:])))))
+            elif atom[0] != "not" and atom2[0] == "not":
+                constraints_list.append(BinaryConstraint(constraint_name, \
+                        AtomicFormula(atom[0], atom[1:]),\
+                        Not(AtomicFormula(atom2[1], atom2[2:]))))
+            elif atom[0] == "not" and atom2[0] != "not":
+                constraints_list.append(BinaryConstraint(constraint_name, \
+                        Not(AtomicFormula(atom[1], atom[2:]),\
+                        AtomicFormula(atom2[0], atom2[1:]))))
+            else:
+                constraints_list.append(BinaryConstraint(constraint_name, \
+                        Not(AtomicFormula(atom[0], atom[1:])),\
                     Not(AtomicFormula(atom2[0], atom2[1:]))))
+    except KeyError, e:
+        raise SystemExit("ERROR: no se pudo encontrar el predicado %s" %(str(e)))
 
     return constraints_list    
 
@@ -195,9 +205,12 @@ names_constants , names_types , names_predicates , names_facts = {}, {}, {}, {}
 type_of_constant = {}
 
 get_maps()
+
+if DEBUG:
+    print color_red + "\nTIPOS DE CADA CONSTANTE: " + color_normal
+    print type_of_constant
+
 constraints_list = get_constraints(constraints_string)
 
-print type_of_constant
-
-for i in constraints_list:
-    print i
+for c in constraints_list:
+    c.instanciate()
