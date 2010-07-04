@@ -60,9 +60,9 @@ class Constraint:
 
     def add_constraint(self):
         predicate_arg_list = self.gd.arguments
-        self.instantiate(0, len(predicate_arg_list), [])
+        self.instantiate(0, len(predicate_arg_list))
 
-    def instantiate(self, argument_index, max_level, instantiated_vars):
+    def instantiate(self, argument_index, max_level):
         atom = self.gd
         predicate_number = names_predicates[atom.predicate]
         predicate_arg_types = predicates_names[predicate_number][1]        
@@ -70,35 +70,51 @@ class Constraint:
         # predicate_arg_types contiene los enteros correspondientes
         # a los tipos del predicado que se esta analizando
         if argument_index == max_level:
-            instantiated_constraints.append((self.name, [atom.predicate] + predicate_arg_list[:])) 
+            instantiated_constraints.append([self.name, "(" + \
+                    " ".join([atom.predicate] + predicate_arg_list) + ")"]) 
         else:
             # if there's a constant already, continue to the next arg
             if is_instantiated(predicate_arg_list[argument_index]):
-                self.instantiate(argument_index + 1, max_level, instantiated_vars)
+                self.instantiate(argument_index + 1, max_level)
             else:
-                constants_of_this_type = types_names[predicate_arg_types[argument_index]][1]
+                constants_of_this_type = \
+                        types_names[predicate_arg_types[argument_index]][1]
                 for constant in constants_of_this_type:
-                    variables_instantiated = [(argument_index, predicate_arg_list[argument_index])]
+                    variables_instantiated = \
+                            [(argument_index, predicate_arg_list[argument_index])]
                     for j in range(argument_index + 1, max_level):
                         # chequear argumentos repetidos
                         if predicate_arg_list[j] == predicate_arg_list[argument_index]:
                             variables_instantiated.append((j, predicate_arg_list[j]))
-                            predicate_arg_list[j] = constant
-                    predicate_arg_list[argument_index] = constant # instantiate
-                    print predicate_arg_list
-                    self.instantiate(argument_index + 1, max_level, instantiated_vars)
+                            predicate_arg_list[j] = constants_names[constant]
+                    predicate_arg_list[argument_index] = constants_names[constant] # instantiate
+                    #print predicate_arg_list
+                    self.instantiate(argument_index + 1, max_level)
                     for index, var in variables_instantiated:
-                        predicate_arg_list[index] = var # set the variables back
+                        predicate_arg_list[index] = var # des-instanciar las variables
 
 class BinaryConstraint(Constraint):
     def __init__(self, name, gd, gd2):
         Constraint.__init__(self, name, gd)
+
         self.gd2 = gd2
 
     def __str__(self):
         return Constraint.__str__(self) + ", " +\
                str(self.gd2)
 
+    # verificar!!
+
+    def add_constraint(self):
+        predicate_arg_list = self.gd.arguments
+        predicate_arg_list2 = self.gd2.arguments
+
+        constraint1 = Constraint(self.name, self.gd)
+        constraint1.instantiate(0, len(predicate_arg_list), [])
+
+        
+        constraint2 = Constraint("", self.gd2)
+        
 class AtomicFormula:
     def __init__(self, predicate, arguments):
         self.predicate = predicate
@@ -356,3 +372,4 @@ for c in constraints_list:
     instancias = c.add_constraint()
 
 print instantiated_constraints
+print len(instantiated_constraints)
