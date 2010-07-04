@@ -19,7 +19,7 @@ class Constraint:
 
     def __str__(self):
         return "Constraint " + color_red + self.name + " " +\
-                color_green + self.gd + color_normal
+                color_green + str(self.gd) + color_normal
 
 class BinaryConstraint(Constraint):
     def __init__(self, name, gd, gd2):
@@ -28,7 +28,22 @@ class BinaryConstraint(Constraint):
 
     def __str__(self):
         return Constraint.__str__(self) + ", " +\
-                color_green + self.gd2 + color_normal
+                color_green + str(self.gd2) + color_normal
+
+class AtomicFormula:
+    def __init__(self, predicate, arguments):
+        self.predicate = predicate
+        self.arguments = arguments
+
+    def __str__(self):
+        return self.predicate + " " + str(self.arguments)
+
+class Not:
+    def __init__(self, gd):
+        self.gd = gd
+
+    def __str__(self):
+        return "Not " + str(self.gd)
 
 try:
     f = open(argv[1], 'r')
@@ -63,19 +78,47 @@ for i, line in enumerate(lines):
     lines[i] = line.partition(";")[0]
 constraints = " ".join(lines)
 
+# parsear el string "constraints" en este punto
+# si se quiere agregar constraints mas elaboradas
 unary_constraints = re.compile(r"\((at end|at-most-once|always|sometime)\b\s+"\
-                               + "(\(.+\))\)")
+                               + "(\([^)]+\))\)")
 binary_constraints = re.compile(r"\((sometimes-before|sometimes-after)\b\s+"\
                                + "(\([^)]+\))\s+(\([^)]+\))\)")
 
 unary_list = unary_constraints.findall(constraints)
 binary_list = binary_constraints.findall(constraints)
 
+print unary_list
 constraints_list = []
 for c in unary_list:
-    constraints_list.append(Constraint(c[0], c[1]))
+    constraint_name = c[0]
+    atom = c[1].replace('(',' ').replace(')',' ').split()
+    if atom[0] == "not":
+        constraints_list.append(Constraint(constraint_name, \
+                Not(AtomicFormula(atom[1], atom[2:]))))
+    else:
+        constraints_list.append(Constraint(constraint_name, \
+                AtomicFormula(atom[0], atom[1:])))
 for c in binary_list:
-    constraints_list.append(BinaryConstraint(c[0], c[1], c[2]))
+    constraint_name = c[0]
+    atom = c[1].replace('(',' ').replace(')',' ').split()
+    atom2 = c[2].replace('(',' ').replace(')',' ').split()
+    if atom[0] == "not" and atom2[0] == "not":
+        constraints_list.append(BinaryConstraint(constraint_name, \
+                Not(AtomicFormula(atom[1], atom[2:]),\
+                Not(AtomicFormula(atom2[1], atom2[2:])))))
+    elif atom[0] != "not" and atom2[0] == "not":
+        constraints_list.append(BinaryConstraint(constraint_name, \
+                AtomicFormula(atom[0], atom[1:]),\
+                Not(AtomicFormula(atom2[1], atom2[2:]))))
+    elif atom[0] == "not" and atom2[0] != "not":
+        constraints_list.append(BinaryConstraint(constraint_name, \
+                Not(AtomicFormula(atom[1], atom[2:]),\
+                AtomicFormula(atom2[0], atom2[1:]))))
+    else:
+        constraints_list.append(BinaryConstraint(constraint_name, \
+                Not(AtomicFormula(atom[0], atom[1:])),\
+                Not(AtomicFormula(atom2[0], atom2[1:]))))
 
 for c in constraints_list:
     print c
