@@ -18,8 +18,8 @@ class Constraint:
         self.gd = gd
 
     def __str__(self):
-        return "Constraint " + color_red + self.name + " " +\
-                color_green + str(self.gd) + color_normal
+        return "Constraint " + color_red + self.name + color_normal +\
+                " " + str(self.gd)
 
 class BinaryConstraint(Constraint):
     def __init__(self, name, gd, gd2):
@@ -28,7 +28,7 @@ class BinaryConstraint(Constraint):
 
     def __str__(self):
         return Constraint.__str__(self) + ", " +\
-                color_green + str(self.gd2) + color_normal
+               str(self.gd2)
 
 class AtomicFormula:
     def __init__(self, predicate, arguments):
@@ -36,7 +36,8 @@ class AtomicFormula:
         self.arguments = arguments
 
     def __str__(self):
-        return self.predicate + " " + str(self.arguments)
+        return color_green + self.predicate + " " + str(self.arguments)\
+                + color_normal
 
 class Not:
     def __init__(self, gd):
