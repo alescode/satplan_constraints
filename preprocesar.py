@@ -88,7 +88,9 @@ binary_constraints = re.compile(r"\((sometimes-before|sometimes-after)\b\s+"\
 unary_list = unary_constraints.findall(constraints)
 binary_list = binary_constraints.findall(constraints)
 
-print unary_list
+# esta agregacion de constraints sirve solo para casos sencillos
+# (not y formulas atomicas), este manejo se hace para
+# evitar analizar la gramatica
 constraints_list = []
 for c in unary_list:
     constraint_name = c[0]

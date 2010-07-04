@@ -50,7 +50,10 @@ a b - variable
     (sometime (at ?l)) ; si ;;;;
     (at-most-once (at ?l)) ; si ;;;;
     (sometimes-after (at ?l) (at ?l)) ; si ;;;;
+    (sometimes-after (not (at ?e)) (at ?z)) ; si ;;;;
     (sometimes-before (at ?l) (at ?l)) ; si ;;;;
+    (sometimes-before (not (at ?l)) (not (at ?x))) ; si ;;;;
+    (sometimes-before (at ?l) (not (at ?s))) ; si ;;;;
     (sometime (not (at ?l))) ; si ;;;;
     ; hola
 )
