@@ -53,7 +53,9 @@ def get_maps():
         constants_names.append(partition[1])
         names_constants[partition[1]] = int(partition[0])
                                                                 
-    if DEBUG: print constants_names, names_constants
+    if DEBUG:
+        print color_red + "CONSTANTES " + color_normal
+        print constants_names, names_constants
 
     for line in tablas[1].splitlines()[1:]:
         partition = line.split(" ", 2)
@@ -61,12 +63,13 @@ def get_maps():
         constant_list = line.split()[2:]
         for i, const in enumerate(constant_list):
             constant_list[i] = int(const)
+            type_of_constant[constant_list[i]] = int(partition[0]) 
 
         types_names.append((partition[1], constant_list))
         names_types[partition[1]] = int(partition[0])
 
     if DEBUG:
-        print
+        print color_red + "TIPOS " + color_normal
         print types_names, names_types
 
     for line in tablas[2].splitlines()[1:]:
@@ -75,7 +78,7 @@ def get_maps():
         names_predicates[partition[1]] = int(partition[0])
 
     if DEBUG:
-        print
+        print color_red + "PREDICADOS " + color_normal
         print predicates_names, names_predicates
 
     for line in tablas[3].splitlines()[1:]:
@@ -84,7 +87,7 @@ def get_maps():
         names_facts[partition[1]] = int(partition[0])
 
     if DEBUG:
-        print
+        print color_red + "HECHOS " + color_normal
         print facts_names, names_facts
 
 def get_constraints(constraints_string):
@@ -185,11 +188,16 @@ except IOError:
     raise SystemExit("No se encontro el archivo de tablas")
 
 # maps con las asociaciones, globales
-constants_names = types_names = predicates_names = facts_names = []
-names_constants = names_types = names_predicates = names_facts = {}
+constants_names , types_names , predicates_names , facts_names = [], [], [], []
+names_constants , names_types , names_predicates , names_facts = {}, {}, {}, {}
+
+# map que asocia a cada constante su tipo
+type_of_constant = {}
 
 get_maps()
 constraints_list = get_constraints(constraints_string)
+
+print type_of_constant
 
 for i in constraints_list:
     print i
