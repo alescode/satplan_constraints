@@ -34,8 +34,12 @@ class Constraint:
         return "Constraint " + color_red + str(self.name) + color_normal +\
                 " " + str(self.gd)
 
-    def verificar(self):
-        atom = self.gd
+    def verificar(self, gd = None):
+        if gd == None:
+            atom = self.gd
+        else:
+            atom = gd
+
         predicate_number = names_predicates[atom.predicate]
         predicate_arg_types = predicates_names[predicate_number][1]        
         predicate_arg_list = atom.arguments
@@ -105,7 +109,9 @@ class BinaryConstraint(Constraint):
         return Constraint.__str__(self) + ", " +\
                str(self.gd2)
 
-    # verificar!!
+    def verificar(self, gd = None):
+        Constraint.verificar(self, self.gd)
+        Constraint.verificar(self, self.gd2)
 
     def add_constraint(self):
         predicate_arg_list = self.gd.arguments
