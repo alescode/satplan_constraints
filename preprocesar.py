@@ -6,6 +6,8 @@ from sys import argv
 from os.path import isfile
 import re
 
+import itertools
+
 color_red = '\033[1;31m'
 color_blue = '\033[1;34m'
 color_green = '\033[1;32m'
@@ -73,7 +75,7 @@ class Constraint:
             instantiated_constraints.append([self.name, "(" + \
                     " ".join([atom.predicate] + predicate_arg_list) + ")"]) 
         else:
-            # if there's a constant already, continue to the next arg
+            # si ya hay una constante, continuar al siguiente argumento
             if is_instantiated(predicate_arg_list[argument_index]):
                 self.instantiate(argument_index + 1, max_level)
             else:
@@ -109,12 +111,46 @@ class BinaryConstraint(Constraint):
         predicate_arg_list = self.gd.arguments
         predicate_arg_list2 = self.gd2.arguments
 
-        constraint1 = Constraint(self.name, self.gd)
-        constraint1.instantiate(0, len(predicate_arg_list), [])
+        binary_constraints, binary_constraints2 = [], []
 
+        self.instantiate(self.gd, 0, len(predicate_arg_list), binary_constraints)
+        self.instantiate(self.gd2, 0, len(predicate_arg_list2), binary_constraints2)
+       
+        for p in itertools.product(binary_constraints, binary_constraints2):
+            instantiated_constraints.append([self.name, p[0], p[1]])
         
-        constraint2 = Constraint("", self.gd2)
-        
+    def instantiate(self, gd, argument_index, max_level, constraints_generated):
+        atom = gd
+        predicate_number = names_predicates[atom.predicate]
+        predicate_arg_types = predicates_names[predicate_number][1]        
+        predicate_arg_list = atom.arguments
+        # predicate_arg_types contiene los enteros correspondientes
+        # a los tipos del predicado que se esta analizando
+        if argument_index == max_level:
+            constraints_generated.append("(" + \
+                    " ".join([atom.predicate] + predicate_arg_list) + ")") 
+        else:
+            # si ya hay una constante, continuar al siguiente argumento
+            if is_instantiated(predicate_arg_list[argument_index]):
+                self.instantiate(gd, argument_index + 1, max_level, constraints_generated)
+            else:
+                constants_of_this_type = \
+                        types_names[predicate_arg_types[argument_index]][1]
+                for constant in constants_of_this_type:
+                    variables_instantiated = \
+                            [(argument_index, predicate_arg_list[argument_index])]
+                    for j in range(argument_index + 1, max_level):
+                        # chequear argumentos repetidos
+
+                        if predicate_arg_list[j] == predicate_arg_list[argument_index]:
+                            variables_instantiated.append((j, predicate_arg_list[j]))
+                            predicate_arg_list[j] = constants_names[constant]
+                    predicate_arg_list[argument_index] = constants_names[constant] # instantiate
+                    #print predicate_arg_list
+                    self.instantiate(gd, argument_index + 1, max_level, constraints_generated)
+                    for index, var in variables_instantiated:
+                        predicate_arg_list[index] = var # des-instanciar las variables           
+
 class AtomicFormula:
     def __init__(self, predicate, arguments):
         self.predicate = predicate
