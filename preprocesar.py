@@ -409,9 +409,21 @@ for c in constraints_list:
 
 print "\nCONSTRAINTS:"
 for c in constraints_list:
-    print "\nnum_elementos, tipo, predicado, variables" 
-    print c
-    instancias = c.add_constraint()
+    c.add_constraint()
 
-print instantiated_constraints
-print len(instantiated_constraints)
+output = open("constraints", 'w')
+for index, elem in enumerate(instantiated_constraints):
+    try:
+        if len(elem) == 2:
+            output.write(str(constraint_type[elem[0]]) +\
+                " " + str(names_facts[elem[1]]) +"\n")
+        else:
+            output.write(str(constraint_type[elem[0]]) +\
+                " " + str(names_facts[elem[1]]) + " " +\
+                str(names_facts[elem[2]]) +"\n")
+    except KeyError:
+        print "No se pudo procesar el constraint %s" %(elem[0] + " " + elem[1])
+output.close()
+
+#print instantiated_constraints
+#print len(instantiated_constraints)
