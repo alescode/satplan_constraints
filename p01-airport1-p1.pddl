@@ -76,8 +76,5 @@
       )
 )
 
-(:constraints
-;    (always (is-parked ?x ?y))
-)
 
 )

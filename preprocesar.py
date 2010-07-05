@@ -76,8 +76,12 @@ class Constraint:
         # predicate_arg_types contiene los enteros correspondientes
         # a los tipos del predicado que se esta analizando
         if argument_index == max_level:
-            instantiated_constraints.append([self.name, "(" + \
-                    " ".join([atom.predicate] + predicate_arg_list) + ")"]) 
+            if isinstance(self.gd, Not):
+                instantiated_constraints.append([self.name, '-' ,"(" + \
+                        " ".join([atom.predicate] + predicate_arg_list) + ")"]) 
+            else:
+                instantiated_constraints.append([self.name, '+', "(" + \
+                        " ".join([atom.predicate] + predicate_arg_list) + ")"]) 
         else:
             # si ya hay una constante, continuar al siguiente argumento
             if is_instantiated(predicate_arg_list[argument_index]):
@@ -122,8 +126,13 @@ class BinaryConstraint(Constraint):
         self.instantiate(self.gd, 0, len(predicate_arg_list), binary_constraints)
         self.instantiate(self.gd2, 0, len(predicate_arg_list2), binary_constraints2)
        
+        if isinstance(self.gd, Not): sign = "-"
+        else: sign = "+"
+        if isinstance(self.gd2, Not): sign2 = "-"
+        else: sign2 = "+"
+
         for p in itertools.product(binary_constraints, binary_constraints2):
-            instantiated_constraints.append([self.name, p[0], p[1]])
+            instantiated_constraints.append([self.name, sign, p[0], sign2, p[1]])
         
     def instantiate(self, gd, argument_index, max_level, constraints_generated):
         atom = gd
@@ -352,7 +361,11 @@ primero = problema.partition("(:constraints")
 
 constraints_string += " " + primero[2]
 
-no_constraints = primero[0] + " " + ")\n"
+if primero[2] == '':
+    # no hay constraints en el archivo
+    no_constraints = primero[0]
+else:
+    no_constraints = primero[0] + " " + ")\n"
 
 # se reescribe el archivo sin constraints
 archivo_problema = argv[2].partition(".")
@@ -407,23 +420,23 @@ constraints_list = get_constraints(constraints_string)
 for c in constraints_list:
     c.verificar()
 
-print "\nCONSTRAINTS:"
 for c in constraints_list:
     c.add_constraint()
 
 output = open("constraints", 'w')
 for index, elem in enumerate(instantiated_constraints):
     try:
-        if len(elem) == 2:
+        if len(elem) == 3:
             output.write(str(constraint_type[elem[0]]) +\
-                " " + str(names_facts[elem[1]]) +"\n")
-        else:
+                " " + elem[1] + " " + str(names_facts[elem[2]]) +"\n")
+        else: # len(elem) == 5
             output.write(str(constraint_type[elem[0]]) +\
-                " " + str(names_facts[elem[1]]) + " " +\
-                str(names_facts[elem[2]]) +"\n")
+                " " + elem[1] + " " + str(names_facts[elem[2]]) + " " +\
+                elem[3] + " " + str(names_facts[elem[4]]) +"\n")
     except KeyError:
-        print "No se pudo procesar el constraint %s" %(elem[0] + " " + elem[1])
+        print "No se pudo procesar el constraint %s" %(" ".join(elem))
 output.close()
+print "Constraints generados"
 
 #print instantiated_constraints
 #print len(instantiated_constraints)
